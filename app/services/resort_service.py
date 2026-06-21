@@ -14,6 +14,6 @@ async def list_resorts(db: AsyncSession) -> list[str]:
     `resorts` dimension table at that point — not before.
     """
     result = await db.execute(
-        select(distinct(GoldYearly.resort_name)).order_by(GoldYearly.resort_name)
+        select(distinct(GoldYearly.place_name)).order_by(GoldYearly.place_name)
     )
     return list(result.scalars().all())
