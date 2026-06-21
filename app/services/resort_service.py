@@ -1,7 +1,7 @@
 from sqlalchemy import distinct, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.gold import GoldYearly
+from app.models.gold import GoldDaily
 
 
 async def list_resorts(db: AsyncSession) -> list[str]:
@@ -14,6 +14,6 @@ async def list_resorts(db: AsyncSession) -> list[str]:
     `resorts` dimension table at that point — not before.
     """
     result = await db.execute(
-        select(distinct(GoldYearly.place_name)).order_by(GoldYearly.place_name)
+        select(distinct(GoldDaily.place_name)).order_by(GoldDaily.place_name)
     )
     return list(result.scalars().all())

@@ -2,7 +2,7 @@ from sqlalchemy import CheckConstraint, Text
 from sqlalchemy import String, Integer, Date, TIMESTAMP, Numeric, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from db.base import Base
+from app.db.base import Base
 
 
 class GoldYearly(Base):

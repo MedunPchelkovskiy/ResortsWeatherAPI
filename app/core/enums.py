@@ -15,6 +15,6 @@ class ResortName(str, Enum):
     real `resorts` dimension table and switch to a DB-backed lookup instead.
     """
 
-    bansko = "bansko"
-    pamporovo = "pamporovo"
-    borovets = "borovets"
+    bansko = "Bansko"
+    pamporovo = "Pamporovo"
+    borovets = "Borovets"
