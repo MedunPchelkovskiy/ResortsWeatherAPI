@@ -1,0 +1,16 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./app:/code/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
+    env_file:
+      - .env
+    networks:
+      - pg-network
+
+networks:
+  pg-network:
+    external: true

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+asyncpg://postgres-user:password@localhost:5432/raw_weather_api_data"
 
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
