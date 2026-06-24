@@ -78,3 +78,46 @@ async def get_daily(
         db, resort_name=place_name.value, start_date=start_date, end_date=end_date
     )
     return rows  # response_model + from_attributes handles ORM -> DailyOut conversion
+
+
+@router.get("/{place_name}/fivedaysforecast", response_model=list[DailyOut])
+async def get_five_days_forecast(
+        place_name: ResortName,
+        start_date: date | None = Query(
+            default=None,
+            description="Defaults is today.",
+        ),
+        db: AsyncSession = Depends(get_db),
+) -> list[DailyOut]:
+    """
+    Five days weather data for one resort over a start date.
+
+    place_name: validated against the ResortName enum BEFORE this function
+    runs — an unknown resort never reaches this code, FastAPI returns 422
+    automatically.
+
+    start_date : plain query params (?start_date=2026-06-01).
+    FastAPI parses ISO date strings into real `date` objects for you.
+
+    Deliberately NOT done as `end_date: date = Query(default=date.today())` —
+    that default would be computed ONCE, when this module is imported (i.e.
+    when the app starts), and then reused for every request forever. Using
+    `None` as the default and computing "today" inside the function body
+    (below) means it's evaluated fresh on every request.
+    """
+    if start_date is None:
+        start_date = date.today()
+
+    # Per-field constraints (e.g. ge=/le= in Query()) only validate one
+    # field at a time. Relationships BETWEEN fields — like "start must not
+    # be after end" — have to be checked by hand, here in the route.
+    if start_date > date.today():
+        raise HTTPException(
+            status_code=400,
+            detail="start_date must not be after today",
+        )
+
+    rows = await daily_services.get_five_day(
+        db, resort_name=place_name.value, start_date=start_date
+    )
+    return rows  # response_model + from_attributes handles ORM -> DailyOut conversion
