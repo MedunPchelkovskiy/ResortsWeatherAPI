@@ -1,0 +1,6 @@
+# Globally unique — смени ако Azure върне "name already taken"
+acr_name           = "portfolioacr"
+container_app_name = "resort-weather-api"
+environment_name   = "portfolio-env"
+docker_image       = "fastapi-api"
+docker_tag         = "latest"
