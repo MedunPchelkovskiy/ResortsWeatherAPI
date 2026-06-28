@@ -1,13 +1,14 @@
+import asyncio
 from datetime import date, timedelta
 
-from app.schemas.daily import DailyOut
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.enums import ResortName
 from app.db.session import get_db
+from app.schemas.daily import DailyOut
 from app.schemas.resort import ResortOut
-from app.services import daily_services, resort_service
+from app.services import daily_services
 
 router = APIRouter(prefix="/resorts", tags=["resorts"])
 
@@ -121,3 +122,15 @@ async def get_five_days_forecast(
         db, resort_name=place_name.value, start_date=start_date
     )
     return rows  # response_model + from_attributes handles ORM -> DailyOut conversion
+
+
+from app.services import daily_service_adls
+
+
+@router.get("/{place_name}/fivedaysforecast/live", response_model=list[DailyOut])
+async def get_live_forecast(place_name: ResortName) -> list[DailyOut]:
+    """Latest forecast directly from Azure Data Lake parquet files."""
+    records = await asyncio.to_thread(
+        daily_service_adls.get_latest_forecast, place_name.value
+    )
+    return [DailyOut(**r) for r in records]

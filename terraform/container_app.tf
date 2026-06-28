@@ -4,7 +4,6 @@ resource "azurerm_container_app" "app" {
   container_app_environment_id = azurerm_container_app_environment.env.id
   revision_mode                = "Single"
 
-  # System Assigned Managed Identity — no username/password for ACR
   identity {
     type = "SystemAssigned"
   }
@@ -12,6 +11,11 @@ resource "azurerm_container_app" "app" {
   registry {
     server   = azurerm_container_registry.acr.login_server
     identity = "System"
+  }
+
+  secret {
+    name  = "client-secret"
+    value = var.client_secret
   }
 
   ingress {
@@ -26,7 +30,7 @@ resource "azurerm_container_app" "app" {
   }
 
   template {
-    min_replicas = 0
+    min_replicas = 1
     max_replicas = 1
 
     container {
@@ -39,9 +43,24 @@ resource "azurerm_container_app" "app" {
         name  = "PORT"
         value = "8000"
       }
+      env {
+        name  = "TENANT_ID"
+        value = var.tenant_id
+      }
+      env {
+        name  = "CLIENT_ID"
+        value = var.client_id
+      }
+      env {
+        name        = "CLIENT_SECRET"
+        secret_name = "client-secret"
+      }
+      env {
+        name  = "ACCOUNT_URL"
+        value = var.account_url
+      }
     }
   }
 
-  # Depends on role assignment so the identity has AcrPull before first deploy
   depends_on = [azurerm_role_assignment.acr_pull]
 }
