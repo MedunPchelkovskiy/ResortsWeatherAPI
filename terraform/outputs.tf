@@ -8,7 +8,3 @@ output "container_app_fqdn" {
   description = "FQDN of the Container App"
 }
 
-output "acr_login_server" {
-  value       = azurerm_container_registry.acr.login_server
-  description = "ACR login server for docker push"
-}

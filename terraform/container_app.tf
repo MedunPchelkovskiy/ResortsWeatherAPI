@@ -4,14 +4,6 @@ resource "azurerm_container_app" "app" {
   container_app_environment_id = azurerm_container_app_environment.env.id
   revision_mode                = "Single"
 
-  identity {
-    type = "SystemAssigned"
-  }
-
-  registry {
-    server   = azurerm_container_registry.acr.login_server
-    identity = "System"
-  }
 
   secret {
     name  = "client-secret"
@@ -21,7 +13,7 @@ resource "azurerm_container_app" "app" {
   ingress {
     external_enabled = true
     transport        = "http"
-    target_port      = 8000
+    target_port      = 8002
 
     traffic_weight {
       percentage      = 100
@@ -35,13 +27,13 @@ resource "azurerm_container_app" "app" {
 
     container {
       name   = var.container_app_name
-      image  = "${azurerm_container_registry.acr.login_server}/${var.docker_image}:${var.docker_tag}"
+      image = "docker.io/pchelkovskiy/resortsweatherapi-api:latest"
       cpu    = 0.25
       memory = "0.5Gi"
 
       env {
         name  = "PORT"
-        value = "8000"
+        value = "8002"
       }
       env {
         name  = "TENANT_ID"
@@ -62,5 +54,4 @@ resource "azurerm_container_app" "app" {
     }
   }
 
-  depends_on = [azurerm_role_assignment.acr_pull]
 }

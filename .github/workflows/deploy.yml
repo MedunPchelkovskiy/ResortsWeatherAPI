@@ -1,33 +1,37 @@
-#name: Deploy FastAPI
-#
-#on:
-#  push:
-#    branches: ["main"]
-#
-#jobs:
-#  build-deploy:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Azure login
-#        uses: azure/login@v2
-#        with:
-#          creds: ${{ secrets.AZURE_CREDENTIALS }}
-#
-#      - name: Login ACR
-#        run: az acr login --name ${{ secrets.ACR_NAME }}
-#
-#      - name: Build image
-#        run: docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/fastapi:${{ github.sha }} .
-#
-#      - name: Push image
-#        run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/fastapi:${{ github.sha }}
-#
-#      - name: Deploy
-#        run: |
-#          az containerapp update \
-#            --name ${{ secrets.APP_NAME }} \
-#            --resource-group ${{ secrets.RG }} \
-#            --image ${{ secrets.ACR_LOGIN_SERVER }}/fastapi:${{ github.sha }}
+name: Deploy FastAPI
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        run: |
+          docker build -t pchelkovskiy/resortsweatherapi-api:${{ github.sha }} .
+          docker push pchelkovskiy/resortsweatherapi-api:${{ github.sha }}
+          docker tag pchelkovskiy/resortsweatherapi-api:${{ github.sha }} pchelkovskiy/resortsweatherapi-api:latest
+          docker push pchelkovskiy/resortsweatherapi-api:latest
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy
+        run: |
+          az containerapp update \
+            --name resort-weather-api \
+            --resource-group portfolio-rg \
+            --image docker.io/pchelkovskiy/resortsweatherapi-api:${{ github.sha }}
